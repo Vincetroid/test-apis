@@ -45,7 +45,16 @@ class App extends Component {
         // return fetch(`${API_PATH}?${qs.stringify(queryParams)}`, { method: httpMethod });
         // return fetch(`${API_PATH}?${qs.stringify(queryParams)}`, { method: httpMethod });
         // "https://platform.fatsecret.com/rest/server.api?food_id=33691&format=json&method=food.get&oauth_consumer_key=2cd910c9a7234f34b4b72415855f3662&oauth_nonce=1564419767245&oauth_signature=4ZVr5VKy8P4sgzbYn1MQzKOFzMU%3D&oauth_signature_method=HMAC-SHA1&oauth_timestamp=1564419767&oauth_version=1.0"
-        return axios.get(`${API_PATH}?${qs.stringify(queryParams)}`, { method: httpMethod })
+        return axios.get(`${API_PATH}?${qs.stringify(queryParams)}`, { method: httpMethod }).then(response => {
+            console.log('With axios')
+            // console.log(response.data)
+            return response.data;
+        })
+        .catch(error => {
+            console.log('Respuesta de error')
+            console.log(error);
+            return error;
+        });
             
     }
     // }
@@ -61,8 +70,8 @@ class App extends Component {
         const response = await this.makeApiCall(methodParams);
         console.log('response', response)
         // return response.json();
-        console.log('response.data', response.data)
-        return response.data;
+            
+        return response;
         // .then(response => {
         //     console.log('With axios')
         //     console.log(response.data)
@@ -147,8 +156,9 @@ class App extends Component {
 
         console.log(API_PATH)
         console.log(this.getOauthParameters())
-        console.log('Food: ')
-        console.log(this.getFood(33691));
+        // console.log('Food: ')
+        // console.log(this.getFood(33691));
+        console.log('Comida', this.getFood(33691));
     }
 
     render() {
