@@ -25,8 +25,12 @@ class App extends Component {
             encodeURIComponent(API_PATH),
             encodeURIComponent(qs.stringify(queryParams)),
         ].join('&');
+
+        console.table('signatureBaseString', signatureBaseString)
         const signatureKey = `${APP_SECRET}&`;
-        return hmacsha1(signatureKey, signatureBaseString);
+        const nnn = hmacsha1(signatureKey, signatureBaseString);
+        console.log('nnn', nnn)
+        return nnn;
     }
 
     makeApiCall(methodParams, httpMethod = 'GET') {
@@ -36,16 +40,25 @@ class App extends Component {
             format: 'json',
         };
         queryParams['oauth_signature'] = this.getSignature(queryParams, httpMethod);
+        console.log('queryParams', queryParams)
+        console.log('qs stringified', qs.stringify(queryParams))
         return fetch(`${API_PATH}?${qs.stringify(queryParams)}`, { method: httpMethod });
+        // return fetch(`${API_PATH}?${qs.stringify(queryParams)}`, { method: httpMethod });
+
+        // "https://platform.fatsecret.com/rest/server.api?food_id=33691&format=json&method=food.get&oauth_consumer_key=2cd910c9a7234f34b4b72415855f3662&oauth_nonce=1564419767245&oauth_signature=4ZVr5VKy8P4sgzbYn1MQzKOFzMU%3D&oauth_signature_method=HMAC-SHA1&oauth_timestamp=1564419767&oauth_version=1.0"
     }
+    // }
+
 
     async getFood(foodId) {
+    // async getFood(foodId) {
         const methodParams = {
           method: 'food.get',
           food_id: foodId,
         };
         // debugger;
         const response = await this.makeApiCall(methodParams);
+        console.log('response', response)
         return response.json();
     }
 
@@ -109,6 +122,17 @@ class App extends Component {
         //         console.log('Respuesta de error')
         //         console.log(error);
         //     });
+        
+        const timestamp = Math.round(new Date().getTime() / 1000);
+        axios.get('https://platform.fatsecret.com/rest/server.api?food_id=33691&format=json&method=food.get&oauth_consumer_key=2cd910c9a7234f34b4b72415855f3662&oauth_nonce=1564419767245&oauth_signature=4ZVr5VKy8P4sgzbYn1MQzKOFzMU%3D&oauth_signature_method=HMAC-SHA1&oauth_timestamp=' + timestamp + '&oauth_version=1.0')
+            .then(response => {
+                console.log('With axios')
+                console.log(response.data)
+            })
+            .catch(error => {
+                console.log('Respuesta de error')
+                console.log(error);
+            });
 
         console.log(API_PATH)
         console.log(this.getOauthParameters())
