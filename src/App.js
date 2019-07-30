@@ -7,6 +7,10 @@ import { API_PATH, ACCESS_KEY, OAUTH_SIGNATURE_METHOD, OAUTH_VERSION, APP_SECRET
 
 class App extends Component {
 
+    state = {
+        OAuthSignature: ''
+    }
+
     getOauthParameters() {
         // debugger;
         const timestamp = Math.round(new Date().getTime() / 1000);
@@ -34,12 +38,19 @@ class App extends Component {
     }
 
     makeApiCall(methodParams, httpMethod = 'GET') {
+        // debugger;
         const queryParams = {
             ...this.getOauthParameters(),
             ...methodParams,
             format: 'json',
         };
-        queryParams['oauth_signature'] = this.getSignature(queryParams, httpMethod);
+        if (queryParams.method != 'profile.get') {
+            // debugger;
+            queryParams['oauth_signature'] = this.getSignature(queryParams, httpMethod);
+            this.setState({ OAuthSignature: queryParams['oauth_signature'] });
+        } else {
+            queryParams['oauth_signature'] = this.state.OAuthSignature;
+        }
         console.log('queryParams', queryParams)
         console.log('qs stringified', qs.stringify(queryParams))
         // return fetch(`${API_PATH}?${qs.stringify(queryParams)}`, { method: httpMethod });
@@ -94,9 +105,12 @@ class App extends Component {
         return response;
     }
 
-    async getProfile() {
+    async getProfile(OAuthToken, OAuthSecret) {
         const methodParams = {
-            method: 'profile.get'
+            method: 'profile.get',
+            oauth_token: OAuthToken,
+            oauth_secret: OAuthSecret
+            // auth_token: OAuthToken
         }
 
         const response = await this.makeApiCall(methodParams);
@@ -113,9 +127,18 @@ class App extends Component {
         // console.log(this.getFood(33691));
         console.log('Comida', this.getFood(33691));
 
-        console.log('Crear perfil', this.createProfile())
+        // console.log('Crear perfil', this.createProfile())
 
-        console.log('Obtener perfil', this.getProfile())
+        const newProfile = this.createProfile();
+
+        newProfile.then(result => {
+            console.log('newProfile')
+            console.log(result)
+            // console.log('Obtener perfil', this.getProfile(result.profile.auth_token))
+            console.log('Obtener perfil', this.getProfile(result.profile.auth_secret))
+            console.log('Obtener perfil', this.getProfile(result.profile.auth_token, result.profile.auth_secret))
+        })
+
     }
 
     render() {
